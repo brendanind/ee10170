@@ -4,4 +4,4 @@ project(ee10170_coursework_new)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(ee10170_coursework_new
-        main.cpp)
+        src/main.cpp)
