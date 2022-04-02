@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <math.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -41,9 +42,9 @@ string delim(string str, string delim){
     return str.substr(str.find(delim)+1);
 }
 
-string sensor1location = "../sensors/sensor_1.csv";
-string sensor2location = "../sensors/sensor_2.csv";
-string sensor3location = "../sensors/sensor_3.csv";
+string sensor1location = "sensors/sensor_1.csv";
+string sensor2location = "sensors/sensor_2.csv";
+string sensor3location = "sensors/sensor_3.csv";
 
 string output_stream_location = "../sensors/output.csv";
 
@@ -89,6 +90,8 @@ int main() {
 
         //Print the unedited string sensor values:
         cout << "Sensor1original: " << sensor1stringvalue << endl << "Sensor2original: " << sensor2stringvalue << endl << "Sensor3original: " << sensor3stringvalue << "\n\n";
+
+      sleep(1);
 
         /*
         //convert the first sensor value using the function
