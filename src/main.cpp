@@ -7,12 +7,17 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+using namespace std;
 
-
-//SET THIS FLAG TO TRUE IF YOU WANT TO SEE THE DEBUGGING OUTPUTS - PROGRAM RUNS SLOWWWW
+//SET THIS FLAG TO TRUE IF YOU WANT TO SEE THE DEBUGGING OUTPUTS - THIS IS SLOW!
 bool debugging = false;
 
-using namespace std;
+//LOCATIONS OF THE CSV FILES:
+string sensor1location = "sensors/actual/sensor_1.csv";
+string sensor2location = "sensors/actual/sensor_2.csv";
+string sensor3location = "sensors/actual/sensor_3.csv";
+string verbose_location = "sensors/verbose.csv";
+string motor_location = "sensors/motors.csv";
 
 float scale(float input, float alpha_gain, float beta_offset){
     return alpha_gain*(input - beta_offset);
@@ -56,13 +61,6 @@ string delim(string str, string delim){
     return str.substr(str.find(delim)+1);
 }
 
-string sensor1location = "../sensors/actual/sensor_1.csv";
-string sensor2location = "../sensors/actual/sensor_2.csv";
-string sensor3location = "../sensors/actual/sensor_3.csv";
-
-string verbose_location = "../sensors/verbose.csv";
-string motor_location = "../sensors/motors.csv";
-
 string sensor1stringvalue;
 string sensor2stringvalue;
 string sensor3stringvalue;
@@ -91,8 +89,7 @@ int main() {
 
    if (not debugging){
         /*
-        If we are debugging then we want cout otherwise we set it to a fail state, so it outputs nothing and makes
-        The program quicker
+        If we are debugging then we want cout otherwise we set it to a fail state, so it outputs nothing and makes the program quicker
         */
         std::cout.setstate(std::ios_base::failbit);
     }
@@ -119,7 +116,6 @@ int main() {
     if(!sensor3file.is_open()) throw runtime_error("Could not open Sensor 3");
     if(!verbose.is_open()) throw runtime_error("Could not open Verbose file");
     if(!motors.is_open()) throw runtime_error("Could not open Motors file");
-
 
     //Set up the output files:
     verbose << "a," << "b," << "c," << "d," << "e," << "f"<< "\n";
