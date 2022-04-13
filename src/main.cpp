@@ -7,31 +7,92 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+
 using namespace std;
 
 //SET THIS FLAG TO TRUE IF YOU WANT TO SEE THE DEBUGGING OUTPUTS - THIS IS SLOW!
 bool debugging = false;
 
 //LOCATIONS OF THE CSV FILES:
-string sensor1location = "sensors/actual/sensor_1.csv";
-string sensor2location = "sensors/actual/sensor_2.csv";
-string sensor3location = "sensors/actual/sensor_3.csv";
-string verbose_location = "sensors/verbose.csv";
-string motor_location = "sensors/motors.csv";
+string sensor1location = "../sensors/actual/sensor_1.csv";
+string sensor2location = "../sensors/actual/sensor_2.csv";
+string sensor3location = "../sensors/actual/sensor_3.csv";
+string verbose_location = "../sensors/verbose.csv";
+string motor_location = "../sensors/motors.csv";
 
-float scale(float input, float alpha_gain, float beta_offset){
-    return alpha_gain*(input - beta_offset);
-}
+/////SENSOR CLASSES
+class Sensor : public ifstream {
+public:
+    void sensor(){
+        cout << "created a Sensor Object";
+        string stringvalue;
+        float floatvalue, floatvalue_converted, floatvalue_scaled;
+    }
 
-float sensor1conversion(float input){
-    float two_thirds = (float)2 / (float)3;
-    //cout << two_thirds << " multiplied by " << sqrt(input) << endl;
-    return (float)two_thirds*(float)sqrt(input);
-}
+    float scale(float input, float alpha_gain, float beta_offset){
+        return alpha_gain*(input - beta_offset);
+    }
+};
 
-float sensor2conversion(float previous_value, float current_value){
-    return current_value - previous_value;
-}
+class Sensor1 : public Sensor {
+public:
+    void sensor1(){
+        cout << "created a Sensor1 Object";
+        string stringvalue;
+        float floatvalue, floatvalue_converted, floatvalue_scaled;
+    }
+
+    float convert(float input){
+        float two_thirds = (float)2 / (float)3;
+        //cout << two_thirds << " multiplied by " << sqrt(input) << endl;
+        return (float)two_thirds*(float)sqrt(input);
+    }
+};
+
+class Sensor2 : public Sensor {
+public:
+    void sensor2(){
+        cout << "created a Sensor1 Object";
+        string stringvalue;
+        float floatvalue, floatvalue_converted, floatvalue_scaled;
+    }
+    float convert(float previous_value, float current_value){
+        return current_value - previous_value;
+    }
+};
+
+class Logger : public ofstream {
+public:
+    void logger(){
+        cout << "Made a logger object";
+    }
+
+    void open(){
+
+    }
+
+    void setLocation(string l){
+        location = l;
+    }
+
+    void write(int data){
+        // Method to write data to the file
+        logfile << "hello";
+    }
+
+    string getLocation(){
+        return location;
+    }
+protected:
+    // Protected stuff
+
+private:
+    // Private functions/variables
+    string location;
+    ifstream logfile();
+
+};
+//////END SENSOR CLASSES
 
 float sensor_fusion(float sensor1, float sensor2, float sensor3){
     float top = (float)3*(float)(sensor1 - sensor3);
@@ -43,7 +104,6 @@ float sensor_fusion(float sensor1, float sensor2, float sensor3){
     return fused;
 
 }
-
 float clip(float value){
     if (value > 1){
         return 1;
@@ -55,65 +115,43 @@ float clip(float value){
         return value;
     }
 }
-
 string delim(string str, string delim){
     // Returns the stuff after the delimiter:
     return str.substr(str.find(delim)+1);
 }
 
-string sensor1stringvalue;
-string sensor2stringvalue;
-string sensor3stringvalue;
-
-float sensor1floatvalue;
-float sensor2floatvalue;
-float sensor3floatvalue;
-
-float sensor1floatvalue_converted;
-float sensor2floatvalue_converted;
-// sensor3floatvalue_converted not needed as sensor 3 has no conversions
-
-float sensor1floatvalue_converted_scaled;
-float sensor2floatvalue_converted_scaled;
-float sensor3floatvalue_converted_scaled; //not actually converted but keep with convention and call it converted_scaled
-
 float fused;
 float clipped_motor;
 float inverse_clipped;
-float prev_sensor2_temp;
-
-//Use this value when there is no previous value to use yet when converting sensor 2:
-float previousSensorValue = -1;
 
 int main() {
-
    if (not debugging){
         /*
         If we are debugging then we want cout otherwise we set it to a fail state, so it outputs nothing and makes the program quicker
         */
         std::cout.setstate(std::ios_base::failbit);
     }
-    else {
+   else {
         cout.clear();
     }
 
-
-    //Initiate all the input stream sensor objects
-    ifstream sensor1file;
-    ifstream sensor2file;
-    ifstream sensor3file;
+    // INSTANTIATE SOME OBJECTS!!!
+    Sensor1 sensor1;
+    Sensor2 sensor2;
+    Sensor sensor3;
 
     // Open the sensor files in the objects
-    sensor1file.open(sensor1location);
-    sensor2file.open(sensor2location);
-    sensor3file.open(sensor3location);
+    sensor1.open(sensor1location);
+    sensor2.open(sensor2location);
+    sensor3.open(sensor3location);
+
     ofstream verbose(verbose_location);
     ofstream motors(motor_location);
 
-    // Make sure that all the sensors are open
-    if(!sensor1file.is_open()) throw runtime_error("Could not open Sensor 1");
-    if(!sensor2file.is_open()) throw runtime_error("Could not open Sensor 2");
-    if(!sensor3file.is_open()) throw runtime_error("Could not open Sensor 3");
+    // Make sure that all the sensor are open
+    if(!sensor1.is_open()) throw runtime_error("Could not open Sensor 1");
+    if(!sensor2.is_open()) throw runtime_error("Could not open Sensor 2");
+    if(!sensor3.is_open()) throw runtime_error("Could not open Sensor 3");
     if(!verbose.is_open()) throw runtime_error("Could not open Verbose file");
     if(!motors.is_open()) throw runtime_error("Could not open Motors file");
 
@@ -121,17 +159,19 @@ int main() {
     verbose << "a," << "b," << "c," << "d," << "e," << "f"<< "\n";
     motors << "a," << "b" << "\n";
 
-    //While there's still a line left to read in the sensor1file:
-    while (getline(sensor1file, sensor1stringvalue)){
 
-        //Get the other two string lines of each of the other two sensors and save to sensorXvalue variable
-        getline(sensor2file, sensor2stringvalue);
-        getline(sensor3file, sensor3stringvalue);
+
+    //While there's still a line left to read in the sensor1file:
+    while (getline(sensor1, sensor1.stringvalue)){
+
+        //Get the other two string lines of each of the other two sensor and save to sensorXvalue variable
+        getline(sensor2, sensor2.stringvalue);
+        getline(sensor3, sensor3.stringvalue);
 
         //Delimit those strings, so they contain just the sensor values and not the line numbers:
-        sensor1stringvalue = delim(sensor1stringvalue, ",");
-        sensor2stringvalue = delim(sensor2stringvalue, ",");
-        sensor3stringvalue = delim(sensor3stringvalue, ",");
+        sensor1.stringvalue = delim(sensor1.stringvalue, ",");
+        sensor2.stringvalue = delim(sensor2.stringvalue, ",");
+        sensor3.stringvalue = delim(sensor3.stringvalue, ",");
 
         //We are done delim-ing using string, so we convert to a float, so we can perform math on it.
         sensor1floatvalue = stof(sensor1stringvalue);
@@ -156,7 +196,7 @@ int main() {
         //Update the previous sensor value as the raw sensor 2 value for the next time the loop runs
         previousSensorValue = sensor2floatvalue;
 
-        //Scale all the sensors using their respective biases
+        //Scale all the sensor using their respective biases
         sensor1floatvalue_converted_scaled = scale(sensor1floatvalue_converted, 2.7, 1);
         sensor2floatvalue_converted_scaled = scale(sensor2floatvalue_converted, 0.7, -0.5);
         sensor3floatvalue_converted_scaled = scale(sensor3floatvalue, 1, 0.2);
