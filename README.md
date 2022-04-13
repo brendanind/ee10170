@@ -6,6 +6,8 @@ Contact: [bi242@bath.ac.uk](mailto:bi242@bath.ac.uk)
 
 repl.it link: https://replit.com/@brendanind2/ee10170-coursework-new
 
+The main.cpp code is located in the src folder, along with the two class files: logger.cpp and sensors.cpp
+
 Note:
 The deliverables are located in the RESULTS folder
 
