@@ -13,11 +13,17 @@ using namespace std;
 bool debugging = false;
 
 //LOCATIONS OF THE CSV FILES:
-string sensor1location = "sensors/actual/sensor_1.csv";
-string sensor2location = "sensors/actual/sensor_2.csv";
-string sensor3location = "sensors/actual/sensor_3.csv";
-string verbose_location = "sensors/verbose.csv";
-string motor_location = "sensors/motors.csv";
+string sensor1location = "../sensors/actual/sensor_1.csv";
+string sensor2location = "../sensors/actual/sensor_2.csv";
+string sensor3location = "../sensors/actual/sensor_3.csv";
+string verbose_location = "../sensors/verbose.csv";
+string motor_location = "../sensors/results/motors.csv";
+string A_location = "../sensors/results/a.csv";
+string B_location = "../sensors/results/b.csv";
+string C_location = "../sensors/results/c.csv";
+string D_location = "../sensors/results/d.csv";
+string E_location = "../sensors/results/e.csv";
+string F_location = "../sensors/results/f.csv";
 
 //// CLASSES
 class Sensor : public ifstream {
@@ -97,6 +103,7 @@ float fused;
 float clipped_motor;
 float inverse_clipped;
 float previousSensorValue = -1;
+int counter = 1;
 //// END VARIABLE DEFINITIONS
 
 //Start Main Loop
@@ -123,15 +130,10 @@ int main() {
     sensor3.open(sensor3location);
 
     //Open the output file streams
-    a.open("sensors/results/a.csv");
-    b.open("sensors/results/b.csv");
-    c.open("sensors/results/c.csv");
-    d.open("sensors/results/d.csv");
-    e.open("sensors/results/e.csv");
-    f.open("sensors/results/g.csv");
-    motors.open("sensors/results/motors.csv");
+    a.open(A_location); b.open(B_location); c.open(C_location); d.open(D_location); e.open(E_location);f.open(F_location);
+    motors.open(motor_location);
     //Verbose is all of the 6 intermediate outputs as well as the final motor all in one file just for checking purposes
-    verbose.open("sensors/verbose.csv");
+    verbose.open(verbose_location);
 
     // Make sure that all the sensors and outputs are open
     if(!sensor1.is_open()) throw runtime_error("Could not open Sensor 1");
@@ -174,13 +176,13 @@ int main() {
         sensor1.floatvalue_converted = sensor1.convert(sensor1.floatvalue);
         cout << "Sensor1converted: (2/3)*sqrt(" << sensor1.floatvalue <<")= " << sensor1.floatvalue_converted << endl;
         //Output the result to the verbose (POINT A)
-        verbose << sensor1.floatvalue_converted << ","; a << sensor1.floatvalue_converted << ",";
+        verbose << sensor1.floatvalue_converted << ","; a << sensor1.floatvalue_converted << "\n";
 
         //Convert the second sensor using the previous value and the current one.
         sensor2.floatvalue_converted = sensor2.convert(previousSensorValue, sensor2.floatvalue);
         cout << "Sensor2converted: " << sensor2.floatvalue << "-" << previousSensorValue << "= " << sensor2.floatvalue_converted << endl;
         //Output the result to the verbose for (POINT B)
-        verbose << sensor2.floatvalue_converted << ","; b << sensor2.floatvalue_converted << ",";
+        verbose << sensor2.floatvalue_converted << ","; b << sensor2.floatvalue_converted << "\n";
 
         //Update the previous sensor value as the raw sensor 2 value for the next time the loop runs
         previousSensorValue = sensor2.floatvalue;
@@ -192,9 +194,9 @@ int main() {
         //^^Remember that sensor3floatvalue_converted doesn't exist, so we use raw value here (not the converted one, because it doesnt exist)
 
         //Output the scaled values to the verbose file and the respective Logging Points
-        verbose << sensor1.floatvalue_converted_scaled << ","; c << sensor1.floatvalue_converted_scaled << ",";     // (POINT C)
-        verbose << sensor2.floatvalue_converted_scaled << ","; d << sensor2.floatvalue_converted_scaled << ",";     // (POINT D)
-        verbose << sensor3.floatvalue_converted_scaled << ","; e << sensor3.floatvalue_converted_scaled << ",";     // (POINT E)
+        verbose << sensor1.floatvalue_converted_scaled << ","; c << sensor1.floatvalue_converted_scaled << "\n";     // (POINT C)
+        verbose << sensor2.floatvalue_converted_scaled << ","; d << sensor2.floatvalue_converted_scaled << "\n";     // (POINT D)
+        verbose << sensor3.floatvalue_converted_scaled << ","; e << sensor3.floatvalue_converted_scaled << "\n";     // (POINT E)
 
         cout << "Sensor1scaled: 2.7(" << sensor1.floatvalue_converted << "-1)= " << sensor1.floatvalue_converted_scaled << endl << "Sensor2scaled: 0.7(" << sensor2.floatvalue_converted << "--0.5)= " << sensor2.floatvalue_converted_scaled << endl << "Sensor3scaled: 1(" << sensor3.floatvalue << "-0.2)= " << sensor3.floatvalue_converted_scaled << "\n";
 
@@ -202,18 +204,20 @@ int main() {
         fused = sensor_fusion(sensor1.floatvalue_converted_scaled, sensor2.floatvalue_converted_scaled, sensor3.floatvalue_converted_scaled);
         cout << "Fused: ((3(" << sensor1.floatvalue_converted_scaled << "-" << sensor3.floatvalue_converted_scaled << "))/" << sensor2.floatvalue_converted_scaled << ")-3= " << fused << endl;
         //Send to verbose and Logging Poing (POINT F)
-        verbose << fused << endl; f << fused << endl;
+        verbose << fused << ","; f << fused << "\n";
 
         //Output the clipped motor value to the motor.csv and the verbose files
         clipped_motor = clip(fused);
         inverse_clipped = clipped_motor * -1;
-        motors << clipped_motor <<","<< inverse_clipped << endl; verbose << clipped_motor <<","<< inverse_clipped << endl;
+        motors << counter << "," << clipped_motor <<","<< inverse_clipped << endl; verbose << clipped_motor <<","<< inverse_clipped << endl;
         cout << "Original was " << fused << " and Clipped: " << clipped_motor << " " << "Inverse (" << clipped_motor << "*-1=):  " << inverse_clipped << endl;
 
         cout << "\n\n\n";
+        //Increase the line counter each time the loop runs
+        counter += 1;
     }
 
-    // Close all the files because we dont ened anymore
+    // Close all the files because we don't need them anymore
     sensor1.close(); sensor2.close(); sensor3.close();
     verbose.close(); motors.close(); 
     a.close(); b.close(); c.close(); d.close(); e.close(); f.close();
