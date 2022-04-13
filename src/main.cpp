@@ -1,7 +1,7 @@
 // EE10170 Coursework 2 C++ Code
 // bi242@bath.ac.uk
 // March 2022
-//Main Source Code (Run This One!)
+// Main Source Code (Run This One!)
 
 #include <iostream>
 #include <string>
@@ -14,17 +14,17 @@ using namespace std;
 bool debugging = false;
 
 //LOCATIONS OF THE CSV FILES:
-string sensor1location = "../sensors/actual/sensor_1.csv";
-string sensor2location = "../sensors/actual/sensor_2.csv";
-string sensor3location = "../sensors/actual/sensor_3.csv";
-string verbose_location = "../sensors/verbose.csv";
-string motor_location = "../sensors/results/motors.csv";
-string A_location = "../sensors/results/a.csv";
-string B_location = "../sensors/results/b.csv";
-string C_location = "../sensors/results/c.csv";
-string D_location = "../sensors/results/d.csv";
-string E_location = "../sensors/results/e.csv";
-string F_location = "../sensors/results/f.csv";
+string sensor1location = "sensors/sensor_1.csv";
+string sensor2location = "sensors/sensor_2.csv";
+string sensor3location = "sensors/sensor_3.csv";
+string verbose_location = "verbose.csv";
+string motor_location = "RESULTS/motor_output.csv";
+string A_location = "RESULTS/lp_a.csv";
+string B_location = "RESULTS/lp_b.csv";
+string C_location = "RESULTS/lp_c.csv";
+string D_location = "RESULTS/lp_d.csv";
+string E_location = "RESULTS/lp_e.csv";
+string F_location = "RESULTS/lp_f.csv";
 
 //// FUNCTIONS
 float sensor_fusion(float sensor1, float sensor2, float sensor3){
@@ -156,7 +156,7 @@ int main() {
         sensor1.floatvalue_converted_scaled = sensor1.scale(sensor1.floatvalue_converted, 2.7, 1);
         sensor2.floatvalue_converted_scaled = sensor2.scale(sensor2.floatvalue_converted, 0.7, -0.5);
         sensor3.floatvalue_converted_scaled = sensor3.scale(sensor3.floatvalue, 1, 0.2);
-        //^^Remember that sensor3floatvalue_converted doesn't exist, so we use raw value here (not the converted one, because it doesnt exist)
+        //^^Remember that sensor3floatvalue_converted doesn't exist, so we use raw sensor3.floatvalue here (not the .floatvalue_converted, because it doesnt exist)
 
         //Output the scaled values to the verbose file and the respective Logging Points
         verbose << sensor1.floatvalue_converted_scaled << ","; c << sensor1.floatvalue_converted_scaled << "\n";     // (POINT C)
@@ -165,7 +165,7 @@ int main() {
 
         cout << "Sensor1scaled: 2.7(" << sensor1.floatvalue_converted << "-1)= " << sensor1.floatvalue_converted_scaled << endl << "Sensor2scaled: 0.7(" << sensor2.floatvalue_converted << "--0.5)= " << sensor2.floatvalue_converted_scaled << endl << "Sensor3scaled: 1(" << sensor3.floatvalue << "-0.2)= " << sensor3.floatvalue_converted_scaled << "\n";
 
-        //Sensor fusion time !
+        //Sensor fusion time!
         fused = sensor_fusion(sensor1.floatvalue_converted_scaled, sensor2.floatvalue_converted_scaled, sensor3.floatvalue_converted_scaled);
         //Output that to the console
         cout << "Fused: ((3(" << sensor1.floatvalue_converted_scaled << "-" << sensor3.floatvalue_converted_scaled << "))/" << sensor2.floatvalue_converted_scaled << ")-3= " << fused << endl;

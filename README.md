@@ -7,14 +7,14 @@ Contact: [bi242@bath.ac.uk](mailto:bi242@bath.ac.uk)
 repl.it link: https://replit.com/@brendanind2/ee10170-coursework-new
 
 Note:
-The deliverables are located in: <b><h3>../sensors/results/ </h3></b>
+The deliverables are located in the RESULTS folder
 
 <u>This contains: </u>  
-a.csv   
-b.csv   
-c.csv   
-d.csv   
-e.csv   
-f.csv   
-motors.csv  
+lp_a.csv   
+lp_b.csv   
+lp_c.csv   
+lp_d.csv   
+lp_e.csv   
+lp_f.csv   
+motor_output.csv  
 [ total of 7 files ]
