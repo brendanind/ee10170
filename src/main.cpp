@@ -1,12 +1,13 @@
-// EE10170 Coursework Code
+// EE10170 Coursework 2 C++ Code
 // bi242@bath.ac.uk
 // March 2022
-// DWTFUL (Do what the F you like) Licence
+//Main Source Code (Run This One!)
 
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <cmath>
+#include "sensors.cpp"
+#include "logger.cpp"
 using namespace std;
 
 //SET THIS FLAG TO TRUE IF YOU WANT TO SEE THE DEBUGGING OUTPUTS - THIS IS SLOW!
@@ -25,51 +26,6 @@ string D_location = "../sensors/results/d.csv";
 string E_location = "../sensors/results/e.csv";
 string F_location = "../sensors/results/f.csv";
 
-//// CLASSES
-class Sensor : public ifstream {
-public:
-    float floatvalue, floatvalue_converted, floatvalue_converted_scaled;
-    string stringvalue;
-    Sensor(){
-        cout << "created a Sensor Object";
-        
-    }
-    float scale(float input, float alpha_gain, float beta_offset){
-        return alpha_gain*(input - beta_offset);
-    }
-};
-
-class Sensor1 : public Sensor {
-public:
-    //Sensor:Sensor(); //Call the constructor of the base class
-    float convert(float input){
-        float two_thirds = (float)2 / (float)3;
-        //cout << two_thirds << " multiplied by " << sqrt(input) << endl;
-        return (float)two_thirds*(float)sqrt(input);
-    }
-};
-
-class Sensor2 : public Sensor {
-public:
-    //Sensor:Sensor(); //Call the constructor of the base class
-    float convert(float previous_value, float current_value){
-        return current_value - previous_value;
-    }
-};
-
-class Logger : public ofstream {
-public:
-    Logger(){
-        cout << "Made a logger object";
-    }
-
-    void write(int data){
-        // Method to write data to the file
-        cout << "I have written something! (I havent, this is just a test :)";
-    }
-};
-//// END CLASSES
-
 //// FUNCTIONS
 float sensor_fusion(float sensor1, float sensor2, float sensor3){
     float top = (float)3*(float)(sensor1 - sensor3);
@@ -78,8 +34,17 @@ float sensor_fusion(float sensor1, float sensor2, float sensor3){
     //cout << "\n" << top << "/" << bottom << "=" << fraction << endl;
     float fused = fraction - 3;
     //cout << "*********Fusion process: (" << top << "/" << bottom << ")-3=" << fused << "\n";
-    return fused;
 
+    //Check that none of the outputs are NAN (number/0) or INF (0/number) in that case just cap them at -3 or 3
+    if (isnan(fused) || isnan(-fused)){
+        return -3;
+    }
+    if (isinf(fused)){
+        return 3;
+    }
+    else{
+        return fused;
+    }
 }
 float clip(float value){
     if (value > 1){
@@ -149,7 +114,7 @@ int main() {
     if(!f.is_open()) throw runtime_error("Could not open log point F");
 
     //Set up the output files:
-    verbose << "a,b,c,d,e,f,motorA,motorB\n";
+    verbose << "line,a,b,c,d,e,f,motorA,motorB\n";
     motors << "motor,,\n----------------,,\nLine No,Motor A,Motor B\n";
     a<<"Log A\n"; b<<"Log B\n"; c<<"Log C\n"; d<<"Log D\n"; e<<"Log E\n"; f<<"Log F\n";
 
@@ -176,7 +141,7 @@ int main() {
         sensor1.floatvalue_converted = sensor1.convert(sensor1.floatvalue);
         cout << "Sensor1converted: (2/3)*sqrt(" << sensor1.floatvalue <<")= " << sensor1.floatvalue_converted << endl;
         //Output the result to the verbose (POINT A)
-        verbose << sensor1.floatvalue_converted << ","; a << sensor1.floatvalue_converted << "\n";
+        verbose << counter << "," << sensor1.floatvalue_converted << ","; a << sensor1.floatvalue_converted << "\n";
 
         //Convert the second sensor using the previous value and the current one.
         sensor2.floatvalue_converted = sensor2.convert(previousSensorValue, sensor2.floatvalue);
@@ -202,6 +167,7 @@ int main() {
 
         //Sensor fusion time !
         fused = sensor_fusion(sensor1.floatvalue_converted_scaled, sensor2.floatvalue_converted_scaled, sensor3.floatvalue_converted_scaled);
+        //Output that to the console
         cout << "Fused: ((3(" << sensor1.floatvalue_converted_scaled << "-" << sensor3.floatvalue_converted_scaled << "))/" << sensor2.floatvalue_converted_scaled << ")-3= " << fused << endl;
         //Send to verbose and Logging Poing (POINT F)
         verbose << fused << ","; f << fused << "\n";
